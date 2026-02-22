@@ -4,8 +4,9 @@
   "description": "> \"She walks with confidence because she knows she's never alone\"",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "start": "node server.js"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/manjimamahesh-coder/shenova.git"
