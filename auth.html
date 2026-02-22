@@ -454,7 +454,6 @@
 
   </div>
 </main>
-
 <script>
   function switchTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -469,8 +468,7 @@
 
   function togglePw(id, btn) {
     const input = document.getElementById(id);
-    const isText = input.type === 'text';
-    input.type = isText ? 'password' : 'text';
+    input.type = input.type === 'text' ? 'password' : 'text';
   }
 
   function checkStrength(val) {
@@ -497,30 +495,91 @@
     text.style.color = c.bg;
   }
 
-  function handleLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const pass  = document.getElementById('login-password').value;
-    const errEl = document.getElementById('login-error');
-    const sucEl = document.getElementById('login-success');
+  async function handleLogin() {
+    const email   = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl   = document.getElementById('login-error');
+    const sucEl   = document.getElementById('login-success');
     errEl.style.display = 'none';
     sucEl.style.display = 'none';
-    if (!email || !pass) { errEl.style.display = 'block'; return; }
-    sucEl.style.display = 'block';
-    setTimeout(() => { window.location.href = 'index.html'; }, 1800);
+
+    if (!email || !password) {
+      errEl.textContent = 'Please enter your email and password.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent = data.message;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // Save token and user info
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      sucEl.textContent = `Welcome back, ${data.user.firstName}! Redirecting…`;
+      sucEl.style.display = 'block';
+      setTimeout(() => { window.location.href = 'index.html'; }, 1800);
+
+    } catch (err) {
+      errEl.textContent = 'Cannot connect to server. Make sure server.js is running.';
+      errEl.style.display = 'block';
+    }
   }
 
-  function handleSignup() {
-    const fname = document.getElementById('signup-fname').value.trim();
-    const email = document.getElementById('signup-email').value.trim();
-    const pass  = document.getElementById('signup-password').value;
-    const terms = document.getElementById('agree-terms').checked;
-    const errEl = document.getElementById('signup-error');
-    const sucEl = document.getElementById('signup-success');
+  async function handleSignup() {
+    const firstName = document.getElementById('signup-fname').value.trim();
+    const lastName  = document.getElementById('signup-lname').value.trim();
+    const email     = document.getElementById('signup-email').value.trim();
+    const phone     = document.getElementById('signup-phone').value.trim();
+    const password  = document.getElementById('signup-password').value;
+    const terms     = document.getElementById('agree-terms').checked;
+    const errEl     = document.getElementById('signup-error');
+    const sucEl     = document.getElementById('signup-success');
     errEl.style.display = 'none';
     sucEl.style.display = 'none';
-    if (!fname || !email || !pass || !terms) { errEl.style.display = 'block'; return; }
-    sucEl.style.display = 'block';
-    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+
+    if (!firstName || !email || !password || !terms) {
+      errEl.textContent = 'Please fill in all required fields and accept the terms.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, phone, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent = data.message;
+        errEl.style.display = 'block';
+        return;
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      sucEl.textContent = `Welcome to SHENOVA, ${data.user.firstName}! 🎉`;
+      sucEl.style.display = 'block';
+      setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+
+    } catch (err) {
+      errEl.textContent = 'Cannot connect to server. Make sure server.js is running.';
+      errEl.style.display = 'block';
+    }
   }
 </script>
 </body>
